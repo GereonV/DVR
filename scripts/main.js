@@ -1,5 +1,6 @@
 const AREA = document.getElementById("area");
 const SVG = document.getElementById("svg");
+const TABLES = document.getElementById("tables")
 
 AREA.addEventListener("click", clickRouterAdd);
 AREA.addEventListener("click", clickConnection);

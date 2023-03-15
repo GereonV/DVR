@@ -1,6 +1,6 @@
 html, body {
-	margin: 0;
-	padding: 0;
+	/* margin: 0;
+	padding: 0; */
 	height: 100%;
 }
 
@@ -30,4 +30,19 @@ line {
 
 .selected-for-deletion {
 	background-color: crimson;
+}
+
+table {
+	border-collapse: collapse;
+	margin: 5px;
+}
+
+td, th {
+	border: 1px solid lightgrey;
+	text-align: center;
+	padding: 5px;
+}
+
+tr:nth-child(even) {
+	background-color: lightgray;
 }
