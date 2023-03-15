@@ -5,7 +5,7 @@ AREA.addEventListener("click", clickRouterAdd);
 AREA.addEventListener("click", clickConnection);
 
 const network = new Network;
-const connections = new Map; // [ip1, ip2] -> line
+const connections = new Map; // [ip1, ip2] -> [line, text]
 
 function clickRouterAdd(event) {
 	const x = event.offsetX;
@@ -31,7 +31,7 @@ function clickRouterAdd(event) {
 				return;
 			toPosition(element, x, y);
 			for(other of network.getNeighborsOf(element.id))
-				moveLineBetween(connections.get(getConnectionString(element.id, other)), element, document.getElementById(other));
+				moveLineBetween(element, document.getElementById(other));
 		}
 		function stop() {
 			AREA.removeEventListener("mousemove", move);
@@ -67,33 +67,26 @@ function clickConnection(event) {
 		}
 		return;
 	}
-	const existingLine = connections.get(getConnectionString(ip1, ip2));
-	if(!existingLine) {
-		const line = createLine(ip1, ip2);
-		if(line !== null) {
-			moveLineBetween(line, element1, element2);
-			selectedElement.classList.remove("selected-for-deletion");
-			deleteMode = false;
-			selectedElement = null;
-		}
-		return;
-	}
-	if(deleteMode) {
+	const existingConnection = connections.get(getConnectionString(ip1, ip2));
+	if(!existingConnection) {
+		if(createLine(ip1, ip2))
+			moveLineBetween(element1, element2);
+	} else if(deleteMode) {
+		network.deleteConnectionAndReset(ip1, ip2);
 		connections.delete(getConnectionString(ip1, ip2));
 		connections.delete(getConnectionString(ip2, ip1));
-		SVG.removeChild(existingLine);
-		selectedElement.classList.remove("selected-for-deletion");
-		deleteMode = false;
-		selectedElement = null;
-		return;
+		SVG.removeChild(existingConnection[0]);
+		SVG.removeChild(existingConnection[1]);
+	} else {
+		const distance = promptDistance();
+		if(distance !== null) {
+			network.setConnection(ip1, ip2, distance);
+			existingConnection[1].textContent = distance;
+		}
 	}
-	const distance = promptDistance();
-	if(distance !== null) {
-		network.setConnection(ip1, ip2, distance);
-		selectedElement.classList.remove("selected-for-deletion");
-		deleteMode = false;
-		selectedElement = null;
-	}
+	selectedElement.classList.remove("selected", "selected-for-deletion");
+	selectedElement = null;
+	deleteMode = false;
 }
 
 function createRouter() {
@@ -140,20 +133,30 @@ function promptDistance() {
 function createLine(ip1, ip2) {
 	const distance = promptDistance();
 	if(distance === null)
-		return null;
+		return false;
 	network.setConnection(ip1, ip2, distance);
 	const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-	connections.set(getConnectionString(ip1, ip2), line);
-	connections.set(getConnectionString(ip2, ip1), line);
+	const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+	text.textContent = distance;
+	connections.set(getConnectionString(ip1, ip2), [line, text]);
+	connections.set(getConnectionString(ip2, ip1), [line, text]);
 	SVG.appendChild(line);
-	return line;
+	SVG.appendChild(text);
+	return true;
 }
 
-function moveLineBetween(line, element1, element2) {
-	line.setAttribute("x1", AREA.offsetLeft + element1.offsetLeft + element1.offsetWidth / 2);
-	line.setAttribute("y1", AREA.offsetTop  + element1.offsetTop + element1.offsetHeight / 2);
-	line.setAttribute("x2", AREA.offsetLeft + element2.offsetLeft + element2.offsetWidth / 2);
-	line.setAttribute("y2", AREA.offsetTop  + element2.offsetTop + element2.offsetHeight / 2);
+function moveLineBetween(element1, element2) {
+	const [line, text] = connections.get(getConnectionString(element1.id, element2.id));
+	const x1 = AREA.offsetLeft + element1.offsetLeft + element1.offsetWidth / 2;
+	const x2 = AREA.offsetLeft + element2.offsetLeft + element2.offsetWidth / 2;
+	const y1 = AREA.offsetTop  + element1.offsetTop + element1.offsetHeight / 2;
+	const y2 = AREA.offsetTop  + element2.offsetTop + element2.offsetHeight / 2;
+	line.setAttribute("x1", x1);
+	line.setAttribute("y1", y1);
+	line.setAttribute("x2", x2);
+	line.setAttribute("y2", y2);
+	text.setAttribute("x", (x1 + x2) / 2);
+	text.setAttribute("y", (y1 + y2) / 2);
 }
 
 function getConnectionString(ip1, ip2) {
