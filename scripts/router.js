@@ -19,6 +19,17 @@ class Router {
 			neighbor.#routingTable.update(changes, this.#ip, distance);
 	}
 
+	getConnection(otherRouterIP) {
+		return this.#neighbors.get(otherRouterIP)?.[1];
+	}
+
+	getNeighborIPs() {
+		const ips = [];
+		for(const ip of this.#neighbors.keys())
+			ips.push(ip);
+		return ips;
+	}
+
 	static deleteRouterAndResetRoutingTables(routerIP, routers) {
 		if(!routers.delete(routerIP))
 			return;
@@ -29,8 +40,8 @@ class Router {
 	}
 
 	static setConnection(router1, router2, distance) {
-		router1.#neighbors.set(router2.#ip, distance);
-		router2.#neighbors.set(router1.#ip, distance);
+		router1.#neighbors.set(router2.#ip, [router2, distance]);
+		router2.#neighbors.set(router1.#ip, [router1, distance]);
 	}
 
 	static deleteConnection(router1, router2) {
@@ -105,5 +116,13 @@ class Network {
 
 	deleteConnectionAndReset(router1IP, router2IP) {
 		Router.deleteConnection(this.#routers.get(router1IP), this.#routers.get(router2IP));
+	}
+
+	getConnection(router1IP, router2IP) {
+		return this.#routers.get(router1IP).getConnection(router2IP);
+	}
+
+	getNeighborsOf(routerIP) {
+		return this.#routers.get(routerIP).getNeighborIPs();
 	}
 }
