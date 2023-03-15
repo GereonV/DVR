@@ -123,7 +123,7 @@ function toPosition(element, x, y) {
 function promptDistance() {
 	while(true) {
 		const input = prompt("Enter distance");
-		if(input === null)
+		if(input === null || input === "")
 			return null;
 		const distance = +input;
 		if(!isNaN(distance))
@@ -148,10 +148,10 @@ function createLine(ip1, ip2) {
 
 function moveLineBetween(element1, element2) {
 	const [line, text] = connections.get(getConnectionString(element1.id, element2.id));
-	const x1 = AREA.offsetLeft + element1.offsetLeft + element1.offsetWidth / 2;
-	const x2 = AREA.offsetLeft + element2.offsetLeft + element2.offsetWidth / 2;
-	const y1 = AREA.offsetTop  + element1.offsetTop + element1.offsetHeight / 2;
-	const y2 = AREA.offsetTop  + element2.offsetTop + element2.offsetHeight / 2;
+	const x1 = element1.offsetLeft + element1.offsetWidth / 2;
+	const x2 = element2.offsetLeft + element2.offsetWidth / 2;
+	const y1 = element1.offsetTop + element1.offsetHeight / 2;
+	const y2 = element2.offsetTop + element2.offsetHeight / 2;
 	line.setAttribute("x1", x1);
 	line.setAttribute("y1", y1);
 	line.setAttribute("x2", x2);
@@ -162,4 +162,9 @@ function moveLineBetween(element1, element2) {
 
 function getConnectionString(ip1, ip2) {
 	return `${ip1}:${ip2}`;
+}
+
+function recreateTables() {
+	TABLES.replaceChildren();
+	// for(const )
 }
