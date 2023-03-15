@@ -43,8 +43,9 @@ function clickRouterAdd(event) {
 }
 
 let selectedElement = null;
+let deleteMode = false;
 function clickConnection(event) {
-	if(event.button !== 0 || !event.shiftKey || event.target === AREA)
+	if(!event.shiftKey || event.target === AREA)
 		return;
 	if(!selectedElement) {
 		selectedElement = event.target;
@@ -55,18 +56,44 @@ function clickConnection(event) {
 	const element2 = event.target;
 	const ip1 = element1.id, ip2 = element2.id;
 	selectedElement.classList.remove("selected");
-	selectedElement = null;
-	if(element1 === element2)
-		return;
-	if(network.getConnection(ip1, ip2) !== undefined) {
-		const distance = promptDistance();
-		if(distance !== null)
-			network.setConnection(ip1, ip2, distance);
+	if(element1 === element2) {
+		if(!deleteMode) {
+			selectedElement.classList.add("selected-for-deletion");
+			deleteMode = true;
+		} else {
+			selectedElement.classList.remove("selected-for-deletion");
+			deleteMode = false;
+			selectedElement = null;
+		}
 		return;
 	}
-	const line = createLine(ip1, ip2);
-	if(line !== null)
-		moveLineBetween(line, element1, element2);
+	const existingLine = connections.get(getConnectionString(ip1, ip2));
+	if(!existingLine) {
+		const line = createLine(ip1, ip2);
+		if(line !== null) {
+			moveLineBetween(line, element1, element2);
+			selectedElement.classList.remove("selected-for-deletion");
+			deleteMode = false;
+			selectedElement = null;
+		}
+		return;
+	}
+	if(deleteMode) {
+		connections.delete(getConnectionString(ip1, ip2));
+		connections.delete(getConnectionString(ip2, ip1));
+		SVG.removeChild(existingLine);
+		selectedElement.classList.remove("selected-for-deletion");
+		deleteMode = false;
+		selectedElement = null;
+		return;
+	}
+	const distance = promptDistance();
+	if(distance !== null) {
+		network.setConnection(ip1, ip2, distance);
+		selectedElement.classList.remove("selected-for-deletion");
+		deleteMode = false;
+		selectedElement = null;
+	}
 }
 
 function createRouter() {
