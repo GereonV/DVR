@@ -45,7 +45,7 @@ function clickRouterAdd(event) {
 	AREA.appendChild(element);
 	toPosition(element, x, y);
 	function propagate(event) {
-		if(event.shiftKey)
+		if(event.shiftKey || event.ctrlKey)
 			return;
 		network.propagate(element.id);
 		updateRoutingTables();

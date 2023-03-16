@@ -123,7 +123,8 @@ class RoutingTable {
 
 	#updateIfNecessary(targetIP, nextHopIP, distanceToTarget) {
 		const routeToTarget = this.#routes.get(targetIP);
-		if(routeToTarget && (routeToTarget[0] !== nextHopIP && routeToTarget[1] <= distanceToTarget || routeToTarget[1] === distanceToTarget)) // other worse route or same route
+		// if(routeToTarget && (routeToTarget[0] !== nextHopIP && routeToTarget[1] <= distanceToTarget || routeToTarget[1] === distanceToTarget)) // other worse route or same route
+		if(routeToTarget && routeToTarget[1] <= distanceToTarget)
 			return;
 		this.#changes.set(targetIP, distanceToTarget);
 		if(distanceToTarget === Infinity)
