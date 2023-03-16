@@ -76,9 +76,6 @@ function clickConnection(event) {
 		}
 		return;
 	}
-	selectedElement.classList.remove("selected", "selected-for-deletion");
-	selectedElement = null;
-	deleteMode = false;
 	const existingConnection = connections.get(getConnectionString(ip1, ip2));
 	if(!existingConnection) {
 		if(createLine(ip1, ip2))
@@ -97,6 +94,9 @@ function clickConnection(event) {
 			existingConnection[1].textContent = distance;
 		}
 	}
+	selectedElement.classList.remove("selected", "selected-for-deletion");
+	selectedElement = null;
+	deleteMode = false;
 }
 
 function createRouter() {
