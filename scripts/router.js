@@ -112,11 +112,13 @@ class RoutingTable {
 		return this.#routes.get(targetIP)?.[0];
 	}
 
-	deleteDirectConnection(targetIP) {
-		if(this.getNextHopIP(targetIP) !== targetIP) 
-			return;
-		this.#changes.set(targetIP, Infinity);
-		this.#routes.delete(targetIP);
+	deleteDirectConnection(connectedIP) {
+		for(const [targetIP, [nextHopIP, _distance]] of this.#routes) {
+			if(nextHopIP !== connectedIP)
+				continue;
+			this.#changes.set(targetIP, Infinity);
+			this.#routes.delete(targetIP);
+		}
 	}
 
 	#updateIfNecessary(targetIP, nextHopIP, distanceToTarget) {
